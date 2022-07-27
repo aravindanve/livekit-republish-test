@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LiveKit Test</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client@1.2.4"></script>
+    <script>
+      (async () => {
+        // set log level
+        LivekitClient.setLogLevel(LivekitClient.LogLevel.debug);
+
+        // create room
+        const room = new LivekitClient.Room({
+          adaptiveStream: true,
+          dynacast: true,
+          videoCaptureDefaults: {
+            resolution: LivekitClient.VideoPresets.h1080.resolution,
+          },
+          stopLocalTrackOnUnpublish: false,
+        });
+
+        // connect to room
+        await room.connect(
+          "http://localhost:7880",
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0a2V5Iiwic3ViIjoibXlpZGVudGl0eSIsInZpZGVvIjp7InJvb20iOiJ0ZXN0cm9vbSIsInJvb21Kb2luIjp0cnVlfX0.BFDne_hP86HZm29QK9ha4cPl0zPsoZyjPgOqlBI2QWA"
+        );
+
+        console.log("ROOM CONNECTED");
+
+        // create local track
+        const track = await LivekitClient.createLocalVideoTrack();
+
+        console.log("TRACK CREATED");
+
+        // publish track
+        await room.localParticipant.publishTrack(track);
+
+        console.log("TRACK PUBLISHED");
+
+        // wait 5 s
+        // await new Promise((resolve) => setTimeout(resolve, 5e3)); // TODO: uncomment
+
+        // unpublish track
+        await room.localParticipant.unpublishTrack(track, false);
+
+        // wait 5 s
+        // await new Promise((resolve) => setTimeout(resolve, 5e3)); // TODO: uncomment
+
+        try {
+          // publish track again
+          await room.localParticipant.publishTrack(track);
+
+          console.log("TRACK PUBLISHED AGAIN!");
+        } catch (error) {
+          console.error("TRACK NOT PUBLISHED AGAIN!");
+          console.error(error);
+        }
+      })().catch(console.error);
+    </script>
+  </body>
+</html>
